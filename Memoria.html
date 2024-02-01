@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Memoria con Cartas Numeradas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .memory-card {
+            width: 100px;
+            height: 150px;
+            background-color: #000000; /* Fondo azul antes de voltear la carta */
+            display: inline-block;
+            margin: 5px;
+            cursor: pointer;
+            transition: background-color 0.5s;
+            position: relative; /* Para posicionar el número en el centro */
+        }
+
+        .memory-card.flipped {
+            background-color: #ccc; /* Fondo gris para las cartas volteadas */
+        }
+
+        .image {
+            display: none;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Recorta la imagen para que se ajuste al tamaño */
+        }
+
+        .memory-card.flipped .image {
+            display: block;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff; /* Color blanco para el número */
+        }
+
+        .memory-card.flipped .card-number {
+            display: none; /* Oculta el número cuando la carta está volteada */
+        }
+    </style>
+</head>
+<body>
+    <h1>Juego de Memoria</h1>
+    <div id="game-board">
+        <!-- Las cartas se generan dinámicamente con JavaScript -->
+    </div>
+
+    <script>
+        const imagenes = ['Abuela.png', 'Batgirl.jpg', 'Cantinflas.png', 'Carl UP2.png', 'Chicken little.jpg', 'Chimoltrufia.png', 'Cruella.jpg' ,'Darth Maul.jpeg', 'Jack sparrow.png', 'Jake.jpg', 'Jerry.png', 'Mabel.png', 'Mafalda.png', 'Malefica.png', 'Merida.jpeg', 'Mujer maravilla.jpeg', 'Mulan2.jpeg', 'Naruto.jpg', 'Paola Jara.png', 'Pedro el escamoso.png', 'Rapunzel2.png', 'Rene Higuita.png', 'Shopper.jpeg', 'Spiderman2.jpg', 'Superman.jpg', 'Violet Baudelaire.png']; // Nombres de las imágenes
+        const gameBoard = document.getElementById('game-board');
+        let flippedCards = [];
+        let matchedCards = [];
+        let lockBoard = false;
+        let cardNumber = 1;
+
+        // Duplica la lista de imágenes para crear pares
+        const cards = imagenes.concat(imagenes);
+
+        // Mezcla las cartas
+        shuffle(cards);
+
+        // Crea las cartas y las agrega al tablero
+        cards.forEach((imagen, index) => {
+            const card = document.createElement('div');
+            card.classList.add('memory-card');
+            card.addEventListener('click', flipCard);
+
+            const image = document.createElement('img');
+            image.classList.add('image');
+            image.src = imagen;
+
+            const number = document.createElement('div');
+            number.classList.add('card-number');
+            number.textContent = cardNumber;
+            cardNumber++;
+
+            card.appendChild(image);
+            card.appendChild(number);
+            gameBoard.appendChild(card);
+        });
+
+        // Función para mezclar un array
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex, tempValue;
+
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+
+                tempValue = array[currentIndex];
+                array[currentIndex] = array[randomIndex];
+                array[randomIndex] = tempValue;
+            }
+        }
+
+        // Función para voltear una carta
+        function flipCard() {
+            if (lockBoard) return;
+            if (this === flippedCards[0]) return;
+
+            this.classList.add('flipped');
+            flippedCards.push(this);
+
+            if (flippedCards.length === 2) {
+                lockBoard = true;
+                setTimeout(checkMatch, 500); // Cambio de 1000 a 500 milisegundos
+            }
+        }
+
+        // Función para verificar si las cartas son iguales
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+
+            if (card1.children[0].src === card2.children[0].src) {
+                card1.removeEventListener('click', flipCard);
+                card2.removeEventListener('click', flipCard);
+                matchedCards.push(card1, card2);
+
+                if (matchedCards.length === cards.length) {
+                    alert('¡Felicidades, has ganado!');
+                }
+            } else {
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+            }
+
+            flippedCards = [];
+            lockBoard = false; // Habilita el evento click nuevamente
+        }
+    </script>
+</body>
+</html>
+
